@@ -40,6 +40,7 @@ dependencies:
   image:
   http:
   image_cropper:
+  intl:
 
 dev_dependencies:
   flutter_test:

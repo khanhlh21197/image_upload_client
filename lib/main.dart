@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -88,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<Position?> determinePosition() async {
+  Future<void> checkLocationPermission() async{
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -99,19 +100,23 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       throw Exception('Error');
     }
+  }
+
+  Future<Position?> determinePosition() async {
     return await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
   }
 
   Future<void> _uploadImage(File image) async {
     Position? position = await determinePosition();
-    String dateTime = DateTime.now().toIso8601String();
+    String formattedDateTime =
+        DateFormat('HH:mm:ss dd/MM/yyyy').format(DateTime.now());
     String gpsInfo =
-        'Lat: ${position?.latitude}, Lon: ${position?.longitude}, DateTime: $dateTime';
+        'Lat: ${position?.latitude}\n, Lon: ${position?.longitude}\n, DateTime: $formattedDateTime';
     img.Image? imageToUpload = img.decodeImage(image.readAsBytesSync());
 
     // Chèn thông tin vào ảnh
-    img.drawString(imageToUpload!, gpsInfo, font: img.arial48);
+    img.drawString(imageToUpload!, gpsInfo, font: img.arial14, x: 20, y: 20);
 
     // Encode lại ảnh
     List<int> imageBytes = img.encodeJpg(imageToUpload);
@@ -133,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    checkLocationPermission();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
